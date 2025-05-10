@@ -36,8 +36,20 @@ The Python Executor MCP server allows LLMs and other clients to run Python code 
    ```
 
 3. Build the server:
+
    ```
-   go build -o python-executor-mcp
+   go install
+   ```
+
+4. add to MCP client:
+   ```
+   {
+     "mcpServers": {
+       "python-repl": {
+         "command": "code-executor-mcp"
+       }
+     }
+   }
    ```
 
 ## Usage
