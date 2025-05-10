@@ -23,9 +23,9 @@ func main() {
 
 	// write python execute by run in docker container for web scrapting using playwright
 	pythonTool := mcp.NewTool(
-		"python-executor",
+		"python-scraper-executor",
 		mcp.WithDescription(
-			"Python executor tool in separate docker container, using playWright and headless broswer are available for web scraping use this when need to real time data, and return output in print statements!",
+			"Python executor tool in separate docker container, using playWright and headless browser for web scraping, and return output in print statements!",
 		),
 		mcp.WithString(
 			"code",
