@@ -13,6 +13,8 @@ import (
 	"github.com/mark3labs/mcp-go/server"
 )
 
+const DOCKER_IMAGE = "mcr.microsoft.com/playwright:v1.52.0-noble"
+
 func main() {
 	mcpServer := server.NewMCPServer(
 		"python-executor",
@@ -80,7 +82,7 @@ func handlePythonExecution(
 		"-v",
 		fmt.Sprintf("%s:/app", directory),
 		"--net=host",
-		"mcr.microsoft.com/playwright:v1.52.0-noble", // playwright image
+		DOCKER_IMAGE,
 	}
 
 	scriptContent := "#!/bin/bash\nset -e\n"
