@@ -1,0 +1,131 @@
+# Python Executor MCP Server
+
+This MCP server provides a secure sandbox environment for executing Python code with web scraping capabilities using Playwright in a containerized environment.
+
+## Overview
+
+The Python Executor MCP server allows LLMs and other clients to run Python code in an isolated Docker container with Playwright support for web scraping tasks. The server handles the execution environment, dependency management, and secure isolation, returning the output from the Python script.
+
+## Features
+
+- 🐍 Execute arbitrary Python code in a secure Docker container
+- 🎭 Access to Playwright for headless browser automation
+- 🔧 Specify custom Python libraries to install
+- 🔒 Isolated execution environment for security
+- 🌐 Web scraping capabilities with full browser support
+
+## Prerequisites
+
+- [Go](https://golang.org/)
+- [Docker](https://www.docker.com/)
+- The Docker image `mcr.microsoft.com/playwright:v1.52.0-noble` (will be pulled automatically if not present)
+
+## Installation
+
+1. Clone this repository:
+
+   ```
+   git clone https://github.com/yourusername/code-executor-mcp.git
+   cd code-executor-mcp
+   ```
+
+2. Install dependencies:
+
+   ```
+   go mod download
+   ```
+
+3. Build the server:
+   ```
+   go build -o python-executor-mcp
+   ```
+
+## Usage
+
+### Running the server
+
+```
+./python-executor-mcp
+```
+
+The server uses standard input/output for communication according to the MCP protocol.
+
+### Connecting with an MCP client
+
+This server exposes a single tool:
+
+- **Tool Name**: `python-scraper-executor`
+- **Description**: Python executor tool in separate Docker container, using Playwright and headless browser for web scraping, and returns output in print statements.
+
+#### Tool Parameters
+
+- `code` (string, required): Python code to execute
+- `libraries` (array of strings, optional): Python libraries to install in the container
+
+### Example Python Code
+
+Here's an example of a web scraping script that fetches the top 10 articles from Hacker News:
+
+```python
+import requests
+from bs4 import BeautifulSoup
+# Send a request to Hacker News
+response = requests.get("https://news.ycombinator.com/")
+soup = BeautifulSoup(response.text, "html.parser")
+# Find all story titles and links
+items = []
+titles = soup.select("span.titleline > a")
+scores = soup.select("span.score")
+score_index = 0
+for i, title in enumerate(titles[:10]):
+  # Get the score if available
+  score_text = "No score"
+  if score_index < len(scores):
+    subtext = scores[score_index].text
+    score_text = subtext
+    score_index += 1
+
+    # Get the link
+    link = title["href"]
+    if not link.startswith("http"):
+      link = f"https://news.ycombinator.com/{link}"
+
+    items.append({
+      "title": title.text,
+      "link": link,
+      "score": score_text
+    })
+
+    # Print the top 10 articles
+    print("# Top 10 Hacker News Articles")
+    for i, item in enumerate(items, 1):
+      print(f"{i}. **{item['title']}**")
+      print(f"   - Score: {item['score']}")
+      print(f"   - Link: {item['link']}")
+      print()
+```
+
+## How It Works
+
+1. The server receives Python code and optional library dependencies from an MCP client
+2. It creates a temporary directory to store the Python script
+3. It prepares a Docker container with the specified libraries installed
+4. The code is executed in the isolated container with Playwright support
+5. Output from the script is captured and returned to the client
+6. The temporary directory is cleaned up after execution
+
+## Security Considerations
+
+This server runs arbitrary code in a Docker container. While this provides isolation from the host system, be aware:
+
+- The container has network access (using `--net=host`) to facilitate web scraping
+- Code execution is only as secure as the Docker setup on your system
+- No resource limits are enforced by default
+
+## License
+
+[MIT License](LICENSE)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
